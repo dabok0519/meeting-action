@@ -1,0 +1,11 @@
+# 로컬 전용 (개인 작업 지침, 원격 GitHub엔 올리지 않음)
+CLAUDE.md
+
+# 환경 변수 / 시크릿
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
