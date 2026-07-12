@@ -136,3 +136,23 @@ def add_action_item(meeting_id: int, req: ActionItemIn, db: Session = Depends(ge
     db.commit()
     db.refresh(action_item)
     return action_item
+
+
+@app.delete("/meetings/{meeting_id}", status_code=204)  # 삭제 성공 시 돌려줄 데이터가 없어기 때문에 204 No Content로 명시 (cascade로 action_items도 함께 삭제)
+def delete_meeting(meeting_id: int, db: Session = Depends(get_db)):
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first() # 회의록이 존재하는지 확인  
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
+
+    db.delete(meeting)
+    db.commit()
+
+
+@app.delete("/action-items/{item_id}", status_code=204) # 삭제 성공 시 돌려줄 데이터가 없어서 204 No Content로 명시 (회의록 자체는 안 건드림)
+def delete_action_item(item_id: int, db: Session = Depends(get_db)):
+    action_item = db.query(models.ActionItem).filter(models.ActionItem.id == item_id).first()
+    if action_item is None:
+        raise HTTPException(status_code=404, detail="해당 액션아이템이 존재하지 않습니다")
+
+    db.delete(action_item)
+    db.commit()
