@@ -10,6 +10,7 @@ import models
 from database import SessionLocal, engine
 from openrouter_client import call_openrouter
 from schemas import (
+    ActionItemIn,
     ActionItemOut,
     ActionItemUpdateRequest,
     MeetingDetail,
@@ -89,7 +90,7 @@ def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
 
 @app.put("/meetings/{meeting_id}", response_model=MeetingDetail) # 특정 회의록 필드 전체 교체[수정] (action_items 목록 자체는 안 건드림)
 def update_meeting(meeting_id: int, req: MeetingUpdateRequest, db: Session = Depends(get_db)):
-    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first() 
     if meeting is None:
         raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
 
@@ -105,7 +106,7 @@ def update_meeting(meeting_id: int, req: MeetingUpdateRequest, db: Session = Dep
 
 @app.put("/action-items/{item_id}", response_model=ActionItemOut) # 액션아이템 필드 전체 교체[수정]
 def update_action_item(item_id: int, req: ActionItemUpdateRequest, db: Session = Depends(get_db)):
-    action_item = db.query(models.ActionItem).filter(models.ActionItem.id == item_id).first()
+    action_item = db.query(models.ActionItem).filter(models.ActionItem.id == item_id).first() # item_id에 해당하는 액션아이템이 존재하는지 확인
     if action_item is None:
         raise HTTPException(status_code=404, detail="해당 액션아이템이 존재하지 않습니다")
 
@@ -114,6 +115,24 @@ def update_action_item(item_id: int, req: ActionItemUpdateRequest, db: Session =
     action_item.due_date = req.due_date
     action_item.status = req.status
 
+    db.commit()
+    db.refresh(action_item)
+    return action_item
+
+
+@app.post("/meetings/{meeting_id}/action-items", response_model=ActionItemOut) # 회의록 하나에 액션아이템 단일 추가 (배열 추가는 범위 밖)
+def add_action_item(meeting_id: int, req: ActionItemIn, db: Session = Depends(get_db)):
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()  # 액션아이템을 붙일 대상 회의록이 실제로 존재하는지 확인 (없으면 아래에서 404)
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
+
+    action_item = models.ActionItem(
+        meeting_id=meeting_id,
+        task=req.task,
+        assignee=req.assignee,
+        due_date=req.due_date,
+    )
+    db.add(action_item)
     db.commit()
     db.refresh(action_item)
     return action_item
