@@ -9,3 +9,6 @@ CLAUDE.md
 # Python
 __pycache__/
 *.py[cod]
+
+# 로컬 개발용 SQLite DB 파일
+*.db
