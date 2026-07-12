@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session
 import models
 from database import SessionLocal, engine
 from openrouter_client import call_openrouter
-from schemas import MeetingDetail, MeetingSaveRequest, MeetingSaveResponse
+from schemas import (
+    ActionItemOut,
+    ActionItemUpdateRequest,
+    MeetingDetail,
+    MeetingSaveRequest,
+    MeetingSaveResponse,
+    MeetingUpdateRequest,
+)
 
 models.Base.metadata.create_all(bind=engine) # 앱 시작 시 정의한 meetings, action_items 테이블이 없으면 생성 (존재하면 생성 x )
 
@@ -70,6 +77,7 @@ def list_meetings(db: Session = Depends(get_db)):
     return db.query(models.Meeting).order_by(models.Meeting.created_at.desc()).all() # 최신 회의록이 먼저 오게 기초적인 정렬
            # Meeting 테이블의 모든 회의록 조회하여 List형태로 반환        
 
+
 @app.get("/meetings/{meeting_id}", response_model=MeetingDetail) # 상세 조회: action_items까지 포함한 전체 데이터 
 def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
     meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
@@ -77,3 +85,35 @@ def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
     if meeting is None:
         raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
     return meeting
+
+
+@app.put("/meetings/{meeting_id}", response_model=MeetingDetail) # 특정 회의록 필드 전체 교체[수정] (action_items 목록 자체는 안 건드림)
+def update_meeting(meeting_id: int, req: MeetingUpdateRequest, db: Session = Depends(get_db)):
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
+
+    meeting.title = req.title
+    meeting.raw_text = req.raw_text
+    meeting.decisions = req.decisions
+    meeting.discussions = req.discussions
+
+    db.commit()
+    db.refresh(meeting)
+    return meeting
+
+
+@app.put("/action-items/{item_id}", response_model=ActionItemOut) # 액션아이템 필드 전체 교체[수정]
+def update_action_item(item_id: int, req: ActionItemUpdateRequest, db: Session = Depends(get_db)):
+    action_item = db.query(models.ActionItem).filter(models.ActionItem.id == item_id).first()
+    if action_item is None:
+        raise HTTPException(status_code=404, detail="해당 액션아이템이 존재하지 않습니다")
+
+    action_item.task = req.task
+    action_item.assignee = req.assignee
+    action_item.due_date = req.due_date
+    action_item.status = req.status
+
+    db.commit()
+    db.refresh(action_item)
+    return action_item

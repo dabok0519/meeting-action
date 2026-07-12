@@ -54,3 +54,17 @@ class MeetingDetail(BaseModel): # 회의록 상세 조회용 스키마 :  목록
 
     class Config:
         from_attributes = True
+
+
+class MeetingUpdateRequest(BaseModel): # 회의록 수정 요청 스키마 : 전체 교체(PUT) 방식이라 필드 전부 필수
+    title: str
+    raw_text: str
+    decisions: List[str]
+    discussions: List[str]
+
+
+class ActionItemUpdateRequest(BaseModel): # 액션아이템 수정 요청 스키마 : task/status는 필수, assignee/due_date는 null일 경우를 대비해 Optional
+    task: str
+    assignee: Optional[str] = None
+    due_date: Optional[str] = None
+    status: str
