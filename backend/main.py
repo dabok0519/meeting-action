@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import requests
 from fastapi import Depends, FastAPI, HTTPException
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 import models
 from database import SessionLocal, engine
 from openrouter_client import call_openrouter
-from schemas import MeetingSaveRequest, MeetingSaveResponse
+from schemas import MeetingDetail, MeetingSaveRequest, MeetingSaveResponse
 
 models.Base.metadata.create_all(bind=engine) # 앱 시작 시 정의한 meetings, action_items 테이블이 없으면 생성 (존재하면 생성 x )
 
@@ -56,7 +57,23 @@ def save_meeting(req: MeetingSaveRequest, db: Session = Depends(get_db)):
         discussions=req.discussions,
         action_items=[ models.ActionItem(task=item.task, assignee=item.assignee, due_date=item.due_date) for item in req.action_items])
    
-    db.add(meeting) # db 버퍼에 객체 추가 
-    db.commit() # 실제 db 반영 
-    db.refresh(meeting) # DB가 부여한 PK값을 객체에 반영 
-    return meeting # 프론트로 값을 반환 
+    db.add(meeting) # db 버퍼에 객체 추가
+    db.commit() # 실제 db 반영
+    db.refresh(meeting) # DB가 부여한 PK값을 객체에 반영
+    return meeting # 프론트로 값을 반환
+
+
+@app.get("/meetings", response_model=List[MeetingSaveResponse]) # 목록 조회: 저장 응답과 동일한 요약 형태(id, title, created_at) 재사용
+                                                                # MeetingSaveResponse(BaseModel)와 동일한 구조로 기초적인 회의록 목록 조회 
+                                                            
+def list_meetings(db: Session = Depends(get_db)):
+    return db.query(models.Meeting).order_by(models.Meeting.created_at.desc()).all() # 최신 회의록이 먼저 오게 기초적인 정렬
+           # Meeting 테이블의 모든 회의록 조회하여 List형태로 반환        
+
+@app.get("/meetings/{meeting_id}", response_model=MeetingDetail) # 상세 조회: action_items까지 포함한 전체 데이터 
+def get_meeting(meeting_id: int, db: Session = Depends(get_db)):
+    meeting = db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+                                      # WHERE절과 동일 -> meeting_id에 해당하는 회의록이 존재하면 meeting 객체 반환, 없으면 None 반환
+    if meeting is None:
+        raise HTTPException(status_code=404, detail="해당 회의록이 존재하지 않습니다")
+    return meeting
