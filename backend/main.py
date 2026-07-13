@@ -57,7 +57,10 @@ def analyze(req: AnalyzeRequest):
         )
     except requests.exceptions.HTTPError as e:  # 호출과 연결은 됐지만 서버가 "처리 실패"를 반환
         raise HTTPException(status_code=502, detail=f"AI 호출 실패: {e}")
-    
+
+    except requests.exceptions.ConnectionError: # 연결 자체가 안 됨 (네트워크 끊김, DNS 실패 등) - 재시도까지 다 실패한 경우
+        raise HTTPException(status_code=502, detail="AI 서버에 연결할 수 없습니다. 네트워크 상태를 확인하고 잠시 후 다시 시도해주세요.")
+
     except json.JSONDecodeError: #  호출과 연결은 됐지만 그게 깨진 JSON이거나 JSON이 아닌 경우
         raise HTTPException(status_code=502, detail="AI 응답을 JSON으로 파싱하지 못했습니다.")
 

@@ -61,7 +61,7 @@ def call_openrouter(meeting_text: str, max_retries: int = 3) -> dict:
                 continue
             response.raise_for_status() # 2. 429 외 다른 에러 발생 시 재시도 없이 함수 종료 ( 그 외 에러는 발생한 적이 없지만 혹시 모르니 대비 ) 
             break
-        except requests.exceptions.Timeout as e: # 3. Timeout 발생 시 예외 처리 (재시도)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e: # 3. Timeout 및 연결 자체 실패 시 예외 처리 (재시도)
             last_error = e
             time.sleep(5 * (attempt + 1))
     else:
