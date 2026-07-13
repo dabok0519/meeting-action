@@ -17,14 +17,14 @@ SYSTEM_PROMPT = """너는 회의록을 구조화하는 어시스턴트다.
 {
   "decisions": ["문자열", ...],
   "action_items": [
-    {"task": "문자열", "owner": "문자열 또는 null", "due_date": "문자열 또는 null"}
+    {"task": "문자열", "assignee": "문자열 또는 null", "due_date": "문자열 또는 null"}
   ],
   "discussions": ["문자열", ...]
 }
 
 규칙:
 - decisions: 회의에서 확정된 결정사항만.
-- action_items: 실제로 누군가 하기로 한 작업. 원문에 담당자(owner)나 기한(due_date)이 명시되지 않았으면
+- action_items: 실제로 누군가 하기로 한 작업. 원문에 담당자(assignee)나 기한(due_date)이 명시되지 않았으면
   반드시 null로 두고, 절대로 지어내지 마라.
 - discussions: 결정되지 않고 논의만 되었거나 다음으로 미룬 사항.
 - 원문에 없는 내용을 추가하지 마라.
