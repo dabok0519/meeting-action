@@ -13,7 +13,7 @@ function InputPage({ onAnalyzed }) {
     setError(null)
     try {
       const result = await analyzeMeeting(text) // api.js의 analyzemeeting을 호출 (api.js에서 fetch로 /analyze 요청 )
-      onAnalyzed(result) // onAnalyzed(result)를 호출하여 App.jsx의 setAnalyzedData(result)를 실행
+      onAnalyzed({ ...result, raw_text: text }) // 저장 시 원문(raw_text)도 같이 담아서 App.jsx의 setAnalyzedData 실행
       navigate('/review') // navigate함수를 통해 /review 페이지로 이동 
     } catch (e) {
       setError(e.message)
