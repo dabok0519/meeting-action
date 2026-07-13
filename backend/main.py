@@ -3,6 +3,7 @@ from typing import List
 
 import requests
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -22,6 +23,13 @@ from schemas import (
 models.Base.metadata.create_all(bind=engine) # 앱 시작 시 정의한 meetings, action_items 테이블이 없으면 생성 (존재하면 생성 x )
 
 app = FastAPI() # FastAPI 객체 생성
+
+app.add_middleware(
+    CORSMiddleware, # CORS 미들웨어 추가
+    allow_origins=["http://localhost:5173"],  # VITE 개발 서버에서 오는 요청만 기본적으로 허용 (배포 시에는 실제 프론트 주소로 변경 필요)
+    allow_methods=["*"], # 모든 HTTP 메서드 허용
+    allow_headers=["*"], # 모든 HTTP 헤더 허용
+)
 
 
 def get_db(): # 요청마다 DB 세션을 오픈 
