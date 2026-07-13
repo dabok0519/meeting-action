@@ -11,7 +11,13 @@ class ActionItemIn(BaseModel): #  MeetingSaveRequest내  하위 액션 아이템
     due_date: Optional[str] = None # 타입은 문자열 + 값 Optional + 프론트엔드(최종)에서 값을 안보내는 경우 None처리 (회의 이후에 결정될 경우 대비) 
 
 
-class MeetingSaveRequest(BaseModel): #  Meeting 저장 요청 데이터 스키마 : 프론트엔드가 수정한 최종 회의록 데이터를 받아 검사 
+class AnalyzeResponse(BaseModel): # /analyze 응답 검증용 스키마 : AI 출력이 task 누락 및 타입 오류 없는지 확인
+    decisions: List[str]
+    action_items: List[ActionItemIn]
+    discussions: List[str]
+
+
+class MeetingSaveRequest(BaseModel): #  Meeting 저장 요청 데이터 스키마 : 프론트엔드가 수정한 최종 회의록 데이터를 받아 검사
     title: str
     raw_text: str
     # Decision과 Discussion은 복수로 들어올 수 있으므로 List[str]로 정의
