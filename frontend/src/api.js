@@ -18,8 +18,13 @@ async function request(path, { method = "GET", body, timeout = DEFAULT_TIMEOUT }
       body: body ? JSON.stringify(body) : undefined, // 백엔드에 보낼 데이터가 존재하면 body 내용을 직렬화하여 보냄 <-> 보낼 데이터가 없는 경우 비우기 
       signal: controller.signal, // timeout시에 브라우저의 백그라운드 fetch 통신을 강제 종료(취소)하기 위한 신호선 연결
     })
-    if (!res.ok) throw new Error(`API 요청 실패: ${method} ${path} (${res.status})`) // api 통신이 정상적으로 처리되지 않는 경우 에러 강제 발생 
-    return res.status === 204 ? null : res.json( ) // 삭제시에는 돌려줄 데이터가 없기 때문에 파싱을 시도하지 않고 null 반환 
+    if (!res.ok) throw new Error(`API 요청 실패: ${method} ${path} (${res.status})`) // api 통신이 정상적으로 처리되지 않는 경우 에러 강제 발생
+    return res.status === 204 ? null : res.json( ) // 삭제시에는 돌려줄 데이터가 없기 때문에 파싱을 시도하지 않고 null 반환
+  } catch (e) {
+    if (e.name === "AbortError") { // 타임아웃으로 fetch가 강제 중단된 경우 (브라우저 기본 영어 메시지 대신 한국어로 교체)
+      throw new Error(`요청이 시간 초과되었습니다 (${timeout / 1000}초)`)
+    }
+    throw e // AbortError가 아닌 다른 에러(!res.ok, 연결 실패 등)는 원래 메시지 그대로 다시 던짐
   } finally {
     clearTimeout(timer) // 통신이 시간 내에 끝나면 설정해놓은 타이머 제거
   }
