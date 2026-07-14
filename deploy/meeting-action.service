@@ -1,0 +1,15 @@
+[Unit]
+Description=Meeting Action FastAPI backend
+After=network.target 
+# 실행 순서로 네트워크 연결 직후 백엔드를 실행하도록 설정 
+
+[Service]
+User=ubuntu
+# EC2 배포 시 실제 경로로 교체 필요
+WorkingDirectory=/home/ubuntu/meeting-action/backend
+ExecStart=/home/ubuntu/meeting-action/backend/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+Restart=always
+# 백엔드를 꺼져도 다시 켜지게끔 설정 
+
+[Install]
+WantedBy=multi-user.target # 서버 재부팅 시 백엔드를 자동 시작되게 함
