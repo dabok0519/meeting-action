@@ -23,23 +23,34 @@ function InputPage({ onAnalyzed }) {
   }
 
   return (
-  <>                                                        
-    <h2>회의록 입력</h2>                                        
+  <div className="card">
+    <p className="section-label">AI 구조화</p>
 
-    <textarea 
+    <h2>회의록 입력</h2>
+
+    <label
+      htmlFor="meeting-text"
+      style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+    >
+      회의록 원문
+    </label>
+    <textarea
+      id="meeting-text"
       value={text}                                            // 입력창에 지금 표시할 값 = text 상태값
       onChange={(e) => setText(e.target.value)}               // 타이핑할 때마다 실행되는 함수
+      placeholder="회의록 원문을 붙여넣으세요."
+      rows={12}
     />
 
-    <button 
+    <button
       onClick={handleAnalyze}                                 // 클릭하면 handleAnalyze 함수 실행
-      disabled={loading || !text}                             // 실행 이후 버튼을 다시 누르거나 아무것도 안 썼는데 누르는 경우 비활성화 되게끔 설정 
+      disabled={loading || !text}                             // 실행 이후 버튼을 다시 누르거나 아무것도 안 썼는데 누르는 경우 비활성화 되게끔 설정
     >
-      {loading ? '분석 중...' : '분석하기'}                    
+      {loading ? '분석 중...' : '분석하기'}
     </button>
 
-    {error && <p>{error}</p>}                                  
-  </>
+    {error && <p style={{color: 'var(--text-h)', fontWeight: 500}}>{error}</p>}
+  </div>
 )
 }
 
