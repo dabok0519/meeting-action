@@ -74,3 +74,16 @@ class ActionItemUpdateRequest(BaseModel): # 액션아이템 수정 요청 스키
     assignee: Optional[str] = None
     due_date: Optional[str] = None
     status: str
+
+
+class ActionItemWithMeeting(BaseModel): # 전체 액션아이템 대시보드용 스키마 : meeting_title은 ActionItem 속성이 아니라 조회 시 relationship에서 직접 매핑
+    id: int
+    task: str
+    assignee: Optional[str] = None
+    due_date: Optional[str] = None
+    status: str
+    meeting_id: int
+    meeting_title: str
+
+    class Config:
+        from_attributes = True
