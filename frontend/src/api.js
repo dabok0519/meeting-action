@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000"
+const API_BASE = "/api" // 상대경로 -> 로컬은 vite proxy, 배포는 nginx가 이 경로를 백엔드로 연결
 const DEFAULT_TIMEOUT = 15000   // meetings CRUD용
 const ANALYZE_TIMEOUT = 90000   // /analyze용 (백엔드 내부 재시도 감안)
 
