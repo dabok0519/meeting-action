@@ -27,9 +27,9 @@ function MeetingListPage() {
   }, []) // 의존성 배열을 통해 첫 화면 띄움 이후 리렌더링될 때마다 백엔드로 데이터 요청하는 것을 방지 
 
   return (
-    <>
+    <div className="card">
+      <p className="section-label">회의 목록</p>
       <h2>회의록 목록</h2>
-      <Link to="/">새 회의록 입력</Link> 
 
       {loading && <p>불러오는 중...</p>}{/* loading = true 일때 렌더링 */}
       {error && <p>{error}</p>}
@@ -38,12 +38,15 @@ function MeetingListPage() {
       {/* meetings 배열을 map함수를 통해 목록에 있는 회의록 개수만큼 각각 해당 id로 가는 클릭 가능한 링크를 미리 다 만들어 놓음 */}
       {meetings.map((meeting) => (
         <div key={meeting.id}>
-          <Link to={`/meetings/${meeting.id}`}>
-            {meeting.title} — {new Date(meeting.created_at).toLocaleString('ko-KR')} {/* 백엔드가 날짜를 문자열 그대로 돌려주기에 ttoLocaleString으로 한국 날짜로 변경 */} 
+          <Link to={`/meetings/${meeting.id}`} className="meeting-list-item">
+            {meeting.title} —{' '}
+            <span style={{color: 'var(--text)', fontSize: '13px', marginLeft: '8px'}}>
+              {new Date(meeting.created_at).toLocaleString('ko-KR')} {/* 백엔드가 날짜를 문자열 그대로 돌려주기에 ttoLocaleString으로 한국 날짜로 변경 */}
+            </span>
           </Link>
         </div>
       ))}
-    </>
+    </div>
   )
 }
 

@@ -15,7 +15,10 @@ function App() {
       {/* Link, Routes, Route를 쓸 수 있게 감싸는 태그 */}
       <nav className="app-header">
         <span>회의록 분석 서비스</span>
-        <Link to="/meetings">회의 목록</Link>
+        <div style={{ display: 'flex', gap: '20px', gridColumn: 3, justifySelf: 'end' }}>
+          <Link to="/">새 회의록</Link>
+          <Link to="/meetings">회의 목록</Link>
+        </div>
       </nav>
       {/* 여러 개의 Route를 모아두고 현재 url에 맞는 Route를 판단 */}
       <Routes>
