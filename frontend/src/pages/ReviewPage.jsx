@@ -64,37 +64,46 @@ function ReviewPage({ data }) {
   }
 
   return (
-    <>
+    <div className="card">
+      <p className="section-label">AI 구조화 검토</p>
+
       <h2>검토·저장</h2>
 
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
+      <label htmlFor="review-title">회의 제목</label>
+      <input id="review-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
 
-      <p>{data.raw_text}</p>
+      <p style={{background: 'var(--code-bg)', padding: '12px', borderRadius: '8px'}}>{data.raw_text}</p>
 
-      <h3>결정사항</h3>
-      {decisions.map((d, i) => (
-        <input key={i} value={d} onChange={(e) => updateDecision(i, e.target.value)} />
-      ))}
+      <div className="review-section">
+        <p className="section-label">결정사항 ({decisions.length})</p>
+        {decisions.map((d, i) => (
+          <input key={i} value={d} onChange={(e) => updateDecision(i, e.target.value)} />
+        ))}
+      </div>
 
-      <h3>논의사항</h3>
-      {discussions.map((d, i) => (
-        <input key={i} value={d} onChange={(e) => updateDiscussion(i, e.target.value)} />
-      ))}
+      <div className="review-section">
+        <p className="section-label">논의사항 ({discussions.length})</p>
+        {discussions.map((d, i) => (
+          <input key={i} value={d} onChange={(e) => updateDiscussion(i, e.target.value)} />
+        ))}
+      </div>
 
-      <h3>액션아이템</h3>
-      {actionItems.map((item, i) => (
-        <div key={i}>
-          <input value={item.task} onChange={(e) => updateActionItem(i, 'task', e.target.value)} placeholder="할 일" />
-          <input value={item.assignee} onChange={(e) => updateActionItem(i, 'assignee', e.target.value)} placeholder="담당자" />
-          <input value={item.due_date} onChange={(e) => updateActionItem(i, 'due_date', e.target.value)} placeholder="기한" />
-        </div>
-      ))}
+      <div className="review-section">
+        <p className="section-label">액션아이템 ({actionItems.length})</p>
+        {actionItems.map((item, i) => (
+          <div key={i} style={{display: 'flex', gap: '8px'}}>
+            <input value={item.task} onChange={(e) => updateActionItem(i, 'task', e.target.value)} placeholder="할 일" />
+            <input value={item.assignee} onChange={(e) => updateActionItem(i, 'assignee', e.target.value)} placeholder="담당자" />
+            <input value={item.due_date} onChange={(e) => updateActionItem(i, 'due_date', e.target.value)} placeholder="기한" />
+          </div>
+        ))}
+      </div>
 
       <button onClick={handleSave} disabled={loading || !title}>
         {loading ? '저장 중...' : '저장'}
       </button>
       {error && <p>{error}</p>}
-    </>
+    </div>
   )
 }
 
