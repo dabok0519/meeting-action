@@ -18,7 +18,11 @@ async function request(path, { method = "GET", body, timeout = DEFAULT_TIMEOUT }
       body: body ? JSON.stringify(body) : undefined, // 백엔드에 보낼 데이터가 존재하면 body 내용을 직렬화하여 보냄 <-> 보낼 데이터가 없는 경우 비우기 
       signal: controller.signal, // timeout시에 브라우저의 백그라운드 fetch 통신을 강제 종료(취소)하기 위한 신호선 연결
     })
-    if (!res.ok) throw new Error(`API 요청 실패: ${method} ${path} (${res.status})`) // api 통신이 정상적으로 처리되지 않는 경우 에러 강제 발생
+    if (!res.ok) { // api 통신이 정상적으로 처리되지 않는 경우 에러 강제 발생
+      const err = new Error(`API 요청 실패: ${method} ${path} (${res.status})`)
+      err.status = res.status // 상태코드를 에러 객체에 직접 넣어 전달하는 것으로 변경  (기존 문자열 매칭 대비 안정적)
+      throw err
+    }
     return res.status === 204 ? null : res.json( ) // 삭제시에는 돌려줄 데이터가 없기 때문에 파싱을 시도하지 않고 null 반환
   } catch (e) {
     if (e.name === "AbortError") { // 타임아웃으로 fetch가 강제 중단된 경우 (브라우저 기본 영어 메시지 대신 한국어로 교체)
@@ -65,4 +69,8 @@ export function updateActionItem(id, data) {
 
 export function deleteActionItem(id) {
   return request(`/action-items/${id}`, { method: "DELETE" })
+}
+
+export function addActionItem(meetingId, data) { // 특정 회의록의 Action Item 추가 
+  return request(`/meetings/${meetingId}/action-items`, { method: "POST", body: data })
 }
