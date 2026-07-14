@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Optional
 
 import requests
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
@@ -177,18 +177,31 @@ def delete_action_item(item_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/action-items", response_model=List[ActionItemWithMeeting]) # 새 컬럼 없이 기존 relationship을 조회 시점에만 직접 풀어서 meeting_title을 붙임 ( 아래 설명 )
-def list_action_items(db: Session = Depends(get_db)):
+def get_all_action_items(
+    assignee: Optional[str] = None,
+    status: Optional[str] = None,
+    sort_by: Optional[str] = None,  # "due_date" 또는 None
+    db: Session = Depends(get_db),
+):
+    query = db.query(models.ActionItem) # 만약 204번째 줄 for문에서 db.query(models.ActionItem)으로 구현 시 필터링이 무시되기 때문에 query를 먼저 진행 
+    # SQLAlchemy 쿼리는 필요한 조건을 이어붙이는 방식으로 사용 가능 
+    if assignee:
+        query = query.filter(models.ActionItem.assignee == assignee)
+    if status:
+        query = query.filter(models.ActionItem.status == status)
+    if sort_by == "due_date":
+        #  due_date가 String이라 사전순 정렬(진짜 날짜순 아님). 진짜 정렬 필요해지면 due_date를 Date로 바꿔야 함 [한계]
+        query = query.order_by(models.ActionItem.due_date)
+
     return [
         ActionItemWithMeeting(
-            id=i.id, task=i.task, assignee=i.assignee, due_date=i.due_date,          # action_items에 존재하는 컬럼들을 재활용 
-            status=i.status, meeting_id=i.meeting_id, meeting_title=i.meeting.title, # but action_items 테이블엔 meeting_title이라는 컬럼이 없기 때문에  
-                                                                                     # i.meeting을 쓰되 models.py에 정의된 relationship 활용 
+            id=i.id, task=i.task, assignee=i.assignee, due_date=i.due_date,          # action_items에 존재하는 컬럼들을 재활용
+            status=i.status, meeting_id=i.meeting_id, meeting_title=i.meeting.title, # action_items 테이블엔 meeting_title이라는 컬럼이 없기 때문에
+                                                                                     # i.meeting을 쓰되 models.py에 정의된 relationship 활용
                                                                                      # 즉 , SQLAlchemy가 i.meeting_id(FK)를 이용해서 알아서 meetings 테이블에서 해당 회의록을 읽어옴 (i.meeting)
-                                                                                     # .title을 통해 회의록 객체의 title을 읽어옴 
-        )   
-        for i in db.query(models.ActionItem).all() # action_items 테이블의 모든 행을 가져와 행마다  ActionItemWithMeeting 객체로 변환
-                                                   
-                                                    
+                                                                                     # .title을 통해 회의록 객체의 title을 읽어옴
+        )
+        for i in query.all() # 필터 or 정렬 적용된 쿼리 결과를 행마다 ActionItemWithMeeting 객체로 변환
     ]
 
 
