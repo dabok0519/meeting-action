@@ -4,6 +4,7 @@ import InputPage from './pages/InputPage'
 import ReviewPage from './pages/ReviewPage'
 import MeetingListPage from './pages/MeetingListPage'
 import MeetingDetailPage from './pages/MeetingDetailPage'
+import DashboardPage from './pages/DashboardPage'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <div style={{ display: 'flex', gap: '20px', gridColumn: 3, justifySelf: 'end' }}>
           <Link to="/">새 회의록</Link>
           <Link to="/meetings">회의 목록</Link>
+          <Link to="/dashboard">대시보드</Link> {/* 대시보드 링크 추가 [변경] */}
         </div>
       </nav>
       {/* 여러 개의 Route를 모아두고 현재 url에 맞는 Route를 판단 */}
@@ -32,6 +34,7 @@ function App() {
         
         <Route path="/meetings" element={<MeetingListPage />} />
         <Route path="/meetings/:id" element={<MeetingDetailPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />  {/* 대시보드 Route 추가 [변경] */}
       </Routes>
     </BrowserRouter>
   )

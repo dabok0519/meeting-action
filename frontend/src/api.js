@@ -71,6 +71,15 @@ export function deleteActionItem(id) {
   return request(`/action-items/${id}`, { method: "DELETE" })
 }
 
-export function addActionItem(meetingId, data) { // 특정 회의록의 Action Item 추가 
+export function addActionItem(meetingId, data) { // 특정 회의록의 Action Item 추가
   return request(`/meetings/${meetingId}/action-items`, { method: "POST", body: data })
+}
+
+export async function getAllActionItems({ assignee, status, sortBy } = {}) { // 전체 액션아이템 + 소속 회의 제목, 필터/정렬은 쿼리 파라미터로 백엔드에 위임 [변경]
+  const params = new URLSearchParams() // 브라우저에 이미 내장된 도구로, "key=value"를 관리해주는 객체
+  if (assignee) params.set('assignee', assignee) //이름-값 쌍을 하나씩 추가 ( 쌓이는 구조 )
+  if (status) params.set('status', status) 
+  if (sortBy) params.set('sort_by', sortBy)
+  const query = params.toString() ? `?${params.toString()}` : '' // 쌓인 걸 key=value&key2=value2 형태의 문자열로 변환 + URL로 인코딩 
+  return request(`/action-items${query}`) // // query 문자열을 경로에 붙여서 request() 호출하여 파싱된 데이터를 반환
 }
